@@ -1,0 +1,295 @@
+<html>
+
+<head>
+
+  <link rel="stylesheet" type="text/css" href="main.css">
+
+  <meta name="twitter:card" content="photo">
+  <meta name="twitter:site" content="@cabbibo">
+  <meta name="twitter:creator" content="@cabbibo">
+  <meta name="twitter:url" content="http://cabbi.bo">
+  <meta name="twitter:title" content="In Space Puppy We Trust">
+  <meta name="twitter:description" content="In Space Puppy We Trust">
+  <meta name="twitter:creator" content="@cabbibo">
+  <meta name="twitter:image" content="img/ss.png">
+  <meta name="twitter:image:width" content="1440">
+  <meta name="twitter:image:height" content="900">
+  <meta name="twitter:domain" content="cabbi.bo">
+  <meta itemprop="name" content="Cabbi.bo">
+  <meta itemprop="description" content="Long Live Synesthesia">
+  <meta itemprop="image" src="img/ss.png">
+  <meta property="og:title" content="Cabbi.bo">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="img/ss.png"/>
+  <meta property="og:site_name" content="Cabbi.bo">
+  <meta property="og:description" content="In Space Puppy We Trust">
+
+</head>
+<body>
+
+  <div id="GUI"></div>
+
+  <div id="description">
+
+    <a href="http://www.dragcity.com/artists/joanna-newsom" target="_blank"> Holy Other - In Difference </a>
+
+  </div>
+
+
+  
+<script src = "lib/underscore.js"           ></script>
+<script src = "lib/three.js"                ></script>
+<script src = "lib/jquery.min.js"           ></script>
+<script src = "lib/leap.js"                 ></script>
+<script src = "lib/stats.min.js"            ></script>
+<script src = "lib/TrackballControls.js"    ></script>
+<script src = "lib/ShaderLoader.js"         ></script>
+<script src = "lib/UserAudio.js"            ></script>
+<script src = "lib/Stream.js"               ></script>
+<script src = "lib/AudioController.js"      ></script>
+<script src = "lib/AudioTexture.js"         ></script>
+<script src = "lib/PhysicsRenderer.js"      ></script>
+<script src = "lib/ParticleUtils.js"        ></script>
+<script src = "lib/dat.gui.min.js"          ></script>
+<script src = "lib/Loader.js"               ></script>
+
+
+<script src = "GEM.js"                      ></script>
+<script src = "GUI.js"                      ></script>
+<script src = "Cloth.js"                    ></script>
+
+<script src = "js/loadShaders.js"           ></script>
+
+
+<script>
+
+  var container , camera, scene, renderer , stats;
+
+  var gem , gui;
+
+  var tv1 = new THREE.Vector3();
+  var tv2 = new THREE.Vector3();
+
+  // TODO: make into loader
+  var loaded = 0;
+  var neededToLoad = 4;
+
+  var shaders;
+
+  var cloth;
+  loadShaders();
+
+
+  var controller = new Leap.Controller();
+
+  var loader = new Loader();
+  loader.liftCurtain();
+
+  var clock = new THREE.Clock();
+
+  var audioController = new AudioController();
+// audioController.mute.gain.value = 0;
+  var stream = new Stream(  'audio/inDifference.mp3',audioController  );
+
+ /*var userAudio = new UserAudio( audioController );
+  userAudio.onStreamCreated = function(){
+
+    onLoad();
+
+  }*/
+
+  var u = THREE.UVMapping;
+
+  var normalTexture = THREE.ImageUtils.loadTexture( 'img/normals/moss_normal_map.jpg', u , function(){
+   onLoad(); 
+  });
+ // var flagTexture = THREE.ImageUtils.loadTexture( 'img/nvsText.png' );
+ //
+  //var flagTexture = THREE.ImageUtils.loadTexture( 'img/aley.png' );
+  var flagTexture = THREE.ImageUtils.loadTexture( 'img/congrats.png' , u , function(){
+   onLoad(); 
+  });
+
+  var iriTexture = THREE.ImageUtils.loadTexture( 'img/iri/orangeTurq.png' , u , function(){
+   onLoad(); 
+  });
+
+  //dir.normalize();
+  
+  normalTexture.wrapS = THREE.RepeatWrapping;
+  normalTexture.wrapT = THREE.RepeatWrapping;
+
+
+  var G_UNIFORMS = {
+
+    dT      : { type:"f" , value:0                            },
+    time    : { type:"f" , value:0                            },
+    sample  : { type:"f" , value:0                            },
+    t_audio : { type:"t" , value: audioController.texture     },
+    t_refl  : { type:"t" , value: null }
+
+  }
+
+
+
+
+
+ function init(){
+
+
+    scene = new THREE.Scene();
+    
+    camera = new THREE.PerspectiveCamera( 
+      50 ,
+      window.innerWidth / window.innerHeight,
+      .1,
+      100
+    );
+
+    // placing our camera position so it can see everything
+    camera.position.z = 20;
+  //  camera.position.x = -6;
+   // camera.position.y = -.5;
+    camera.lookAt( new THREE.Vector3() );
+
+    // Getting the container in the right location
+    container     = document.createElement( 'div' );
+    container.id  = 'container';
+    
+    document.body.appendChild( container );
+
+    // Getting the stats in the right position
+    stats = new Stats();
+    stats.domElement.id = 'stats';
+    document.body.appendChild( stats.domElement );
+
+    // Setting up our Renderer
+    renderer = new THREE.WebGLRenderer({ alpha: true });
+
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    container.appendChild( renderer.domElement );
+    renderer.domElement.style.background="#000";
+    
+    controls = new THREE.TrackballControls( camera , renderer.domElement);
+
+    controls.minDistance = 1;
+    controls.maxDistance = 60;
+
+    // Making sure our renderer is always the right size
+    window.addEventListener( 'resize', onWindowResize , false );
+    window.addEventListener( 'mousemove', onMouseMove , false );
+
+
+    //gem.debug();
+    controller.connect();
+
+    cloth = new Cloth();
+    cloth.toggle();
+   // cloth.debug();
+
+/*
+    var g = new THREE.IcosahedronGeometry( 1 , 3 );
+    var m = new THREE.MeshNormalMaterial();
+
+    var me = new THREE.Mesh( g , m );
+    scene.add( me );
+
+    var me = new THREE.Mesh( g , m );
+    me.position.x = -3;
+    me.position.y = -2;
+    me.position.z = 0;
+    scene.add( me );
+
+    var me = new THREE.Mesh( g , m );
+    me.position.x = 3.;
+    me.position.y = 2;
+    me.position.z = 0;
+    scene.add( me );
+*/
+  
+    //cloth.body.position.x = -5;
+   /* for( var i = 0; i < 11; i++ ){
+    var c2 = cloth.body.clone();
+    c2.rotation.z = Math.PI * 2 * ( (i+1) / 12);
+    scene.add( c2 );
+    }*/
+
+  }
+
+
+  function animate(){
+
+
+    for( var i = 0; i < 3; i++ ){
+      
+      G_UNIFORMS.dT.value = clock.getDelta();
+      G_UNIFORMS.time.value += G_UNIFORMS.dT.value;
+
+      G_UNIFORMS.sample.value = i+1;
+
+      var t = G_UNIFORMS.time.value
+     // cloth.params.soul.windSpeed.value = .1 * Math.abs( Math.sin( t * .01 ) ) + .01
+      cloth.update();
+    
+   }
+
+
+    audioController.update();
+    stats.update();
+    controls.update();
+
+    renderer.render( scene , camera );
+
+    requestAnimationFrame( animate );
+
+
+   
+
+  
+  }
+
+
+  function onMouseMove(e ){
+
+ 
+  }
+
+  // Resets the renderer to be the proper size
+  function onWindowResize(){
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize( window.innerWidth, window.innerHeight );
+   
+    var dpr = devicePixelRatio || 1;
+
+
+  }
+
+
+  function onLoad(){
+
+
+    loaded ++;
+
+    console.log(loaded );
+    if( loaded === neededToLoad ){
+
+      init();
+      animate();
+      if( stream ) stream.play();
+      
+
+    }
+
+  }
+
+
+
+
+</script>
+
+
+</body>
+</html>
