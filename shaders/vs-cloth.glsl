@@ -1,6 +1,7 @@
 attribute vec3 tri1;
 attribute vec3 tri2;
 
+uniform vec3 lightPos;
 uniform sampler2D t_pos;
 uniform sampler2D t_oPos;
 uniform sampler2D t_audio;
@@ -13,6 +14,10 @@ varying vec3 vVel;
 
 varying vec3 vPos;
 varying vec3 vMPos;
+varying vec3 vMVPos;
+varying mat3 vNormalMatrix;
+
+
 
 varying vec3 vLightDir;
 
@@ -90,11 +95,12 @@ void main(){
 
   vMPos = ( modelMatrix * vec4( pos.xyz , 1. ) ).xyz;
   vMNorm = ( modelMatrix * vec4( vNorm.xyz , 0. ) ).xyz;
+  vMVPos = ( modelViewMatrix * vec4( pos.xyz , 0. ) ).xyz;
 
   //vAudio = texture2D( t_audio , vec2( abs(vNorm.x) , 0. ) );
 
   pos.xyz += vNorm * length(vAudio )* audioDisplacement;//01;
-  vLightDir = normalize( vMPos - vec3( 1000. , 0. , 0. ) );
+  vLightDir = normalize( vMPos - lightPos );
 
   vCamVec = normalize( cameraPosition - vMPos);
   float lu = abs( dot( vCamVec , vNorm ));
@@ -104,7 +110,8 @@ void main(){
   pos.xyz += length( vAudio ) * vNorm * audioDisplacement;
 
   vPos = pos.xyz;
-  
+ 
+  vNormalMatrix = normalMatrix;
   gl_Position = projectionMatrix * modelViewMatrix * vec4( pos.xyz , 1. );
 
 

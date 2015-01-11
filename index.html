@@ -31,7 +31,7 @@
 
   <div id="description">
 
-    <a href="http://www.dragcity.com/artists/joanna-newsom" target="_blank"> Holy Other - In Difference </a>
+    <a href="https://soundcloud.com/holyother" target="_blank"> Holy Other - In Difference </a>
 
   </div>
 
@@ -72,7 +72,7 @@
 
   // TODO: make into loader
   var loaded = 0;
-  var neededToLoad = 4;
+  var neededToLoad = 5;
 
   var shaders;
 
@@ -100,7 +100,7 @@
 
   var u = THREE.UVMapping;
 
-  var normalTexture = THREE.ImageUtils.loadTexture( 'img/normals/moss_normal_map.jpg', u , function(){
+  var normalTexture = THREE.ImageUtils.loadTexture( 'img/normals/water.png', u , function(){
    onLoad(); 
   });
  // var flagTexture = THREE.ImageUtils.loadTexture( 'img/nvsText.png' );
@@ -111,6 +111,10 @@
   });
 
   var iriTexture = THREE.ImageUtils.loadTexture( 'img/iri/orangeTurq.png' , u , function(){
+   onLoad(); 
+ });
+
+ var matcapTexture = THREE.ImageUtils.loadTexture( 'img/matcap/blood.jpg' , u , function(){
    onLoad(); 
   });
 
@@ -220,7 +224,7 @@
   function animate(){
 
 
-    for( var i = 0; i < 3; i++ ){
+    for( var i = 0; i < 1; i++ ){
       
       G_UNIFORMS.dT.value = clock.getDelta();
       G_UNIFORMS.time.value += G_UNIFORMS.dT.value;

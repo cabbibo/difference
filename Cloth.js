@@ -1,7 +1,7 @@
 function Cloth( title , mesh , extraParams ){
 
   var title = title || 'Cloth';
-  var mesh = mesh || new THREE.Mesh( new THREE.PlaneGeometry( 10, 10 , 255 , 255) );
+  var mesh = mesh || new THREE.Mesh( new THREE.PlaneGeometry( 10, 10 ,  127 , 127) );
 
   //mesh.position.x = 10;
   mesh.updateMatrix();
@@ -51,7 +51,7 @@ function Cloth( title , mesh , extraParams ){
 
     soul:{
       
-      windSpeed:     { type:"f" , value: .05  , constraints:[ 0 ,2] },
+      windSpeed:     { type:"f" , value: .09  , constraints:[ 0 ,2] },
 
       windDepth:     { type:"f" , value: 1.4  , constraints:[ 0 , 10] },
       windHeight:     { type:"f" , value: 1.8  , constraints:[ 0 , 10] },
@@ -59,11 +59,11 @@ function Cloth( title , mesh , extraParams ){
       dampening:          { type:"f" , value: .7  , constraints:[ .0 , .9999 ] },
       
 
-      springLength:       { type:"f" , value: 10 / 256  , constraints:[ .01 ,.1 ] },
+      springLength:       { type:"f" , value: 20 / 256  , constraints:[ .01 ,.1 ] },
       springMultiplier:   { type:"f" , value: 10000. , constraints:[ 1000 ,10000 ] },
       //returnMultiplier:   { type:"f" , value: 1000. , constraints:[ .001 ,2000 ] },
 
-      maxVel:             { type:"f" , value: .005   , constraints:[ .00001 , .002 ] },
+      maxVel:             { type:"f" , value: .005   , constraints:[ .00001 , .01 ] },
       noiseSize:          { type:"f" , value: .3   , constraints:[ .001 , 1. ] },
 
       sample:             G_UNIFORMS.sample,
@@ -77,7 +77,7 @@ function Cloth( title , mesh , extraParams ){
     body:{
           
       t_audio:            G_UNIFORMS.t_audio,
-      lightPos:{type:"v3" , value: new THREE.Vector3( 10 , 1 , 1 )},
+      lightPos:{type:"v3" , value: new THREE.Vector3( 10 , 10 , 20 )},
       audioDisplacement: { type:"f" , value: 0   , constraints:[ 0 , .1 ] },
       texScale: { type:"f" , value: 10.   , constraints:[ 0 , 10 ] },
 
@@ -85,6 +85,7 @@ function Cloth( title , mesh , extraParams ){
       t_flag: { type:"t" , value: flagTexture }, 
       t_normal: { type:"t" , value: normalTexture }, 
       t_iri: { type:"t" , value: iriTexture }, 
+      t_matcap: { type:"t" , value: matcapTexture}, 
     },
 
   }
